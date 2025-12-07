@@ -88,11 +88,6 @@ def number_to_chinese(number):
     else:
         return "一百"
 
-def circled_num(n: int) -> str:
-    if 1 <= n <= 20:                       # 目前 Unicode 只到 ⑳
-        return chr(0x245F + n)             # 0x2460 - 1 + n
-    return str(n)                          # 超出 fallback
-
 def kill_all_numbering(doc):
     """样式级 + 段落级 编号全部清零"""
     # 1. 样式级：把所有带 numId 的样式拔掉
@@ -106,6 +101,8 @@ def kill_all_numbering(doc):
         style_el = style._element
         for num_id in style_el.xpath('.//w:numId'):
             num_id.getparent().remove(num_id) 
+            
+
             
 # 添加标题序号
 def add_heading_numbers(doc):
@@ -121,7 +118,12 @@ def add_heading_numbers(doc):
     
     # 初始化标题序号
     heading_numbers = [0, 0, 0, 0, 0, 0, 0, 0, 0]  # 假设最多有九级标题
-
+    
+    def circled_num(n: int) -> str:
+        if 1 <= n <= 20:                       # 目前 Unicode 只到 ⑳
+            return chr(0x245F + n)             # 0x2460 - 1 + n
+        return str(n)                          # 超出 fallback
+        
     # 定义不同层级的序号格式
     def format_number(level, number):
         if level == 0:
@@ -133,28 +135,29 @@ def add_heading_numbers(doc):
         elif level == 3:
             return f"（{number}）"  # 第四层级：（1）（2）（3）
         elif level == 4:
-            return f"{circled_num(i)} "  # 第五层级：1.2.3.
+            return f"{circled_num(number)} "  # 第五层级：圈1 圈2 圈3
         elif level == 5:
-            return f"（{number}）"  # 第六层级：（1）（2）（3）
+            return f"{circled_num(number)} "  # 第六层级：圈1 圈2 圈3
         elif level == 6:
-            return f"{number}."  # 第七层级：1.2.3.
+            return f"{circled_num(number)} "  # 第七层级：圈1 圈2 圈3
         elif level == 7:
-            return f"（{number}）"  # 第八层级：（1）（2）（3）
+            return f"{circled_num(number)} "  # 第八层级：圈1 圈2 圈3
         elif level == 8:
-            return f"{number}."  # 第九层级：1.2.3.
+            return f"{circled_num(number)} "  # 第九层级：圈1 圈2 圈3
         else:
             return f"{number}."  # 默认格式
 
     # 遍历文档中的所有段落
     for paragraph in doc.paragraphs:
-        for p in doc.paragraphs:
-            p_pr = p._p.get_or_add_pPr()
-            num_pr = p_pr.find(qn('w:numPr'))
-            if num_pr is not None:
-                p_pr.remove(num_pr)
-        paragraph.text = number_pattern.sub('', paragraph.text).strip()
         # 检查段落是否是标题
         if paragraph.style.name.startswith('Heading'):
+            #清洗序号
+            for p in doc.paragraphs:
+                p_pr = p._p.get_or_add_pPr()
+                num_pr = p_pr.find(qn('w:numPr'))
+                if num_pr is not None:
+                    p_pr.remove(num_pr)
+            paragraph.text = number_pattern.sub('', paragraph.text).strip()
             # 获取标题级别
             level = int(paragraph.style.name.split(' ')[1]) - 1
 
@@ -251,6 +254,7 @@ if f and st.button("开始排版"):
         out = process_doc(f.read())
     st.download_button("下载已排版文件", data=out,
                    file_name=f"{f.name.replace('.docx', '')}_已排版.docx")
+
 
 
 
