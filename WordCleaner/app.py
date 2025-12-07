@@ -237,6 +237,7 @@ def process_doc(uploaded_bytes):
     doc = Document(BytesIO(uploaded_bytes))
     # 下面就是你原来的 main 逻辑里“处理”部分
     for para in doc.paragraphs:
+        zero_indent(para)
         lvl = get_outline_level_from_xml(para)
         if lvl and para.style.name == "Normal":
             para.style = doc.styles[f"Heading {lvl}"]
@@ -256,6 +257,7 @@ if f and st.button("开始排版"):
         out = process_doc(f.read())
     st.download_button("下载已排版文件", data=out,
                    file_name=f"{f.name.replace('.docx', '')}_已排版.docx")
+
 
 
 
