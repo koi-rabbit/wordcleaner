@@ -15,9 +15,9 @@ style_rules = {
     4: {'style_name': 'Heading 4', 'font_name': 'Times New Roman','cz_font_name': '宋体', 'font_size': 10.5, 'bold': False, 'space_before': 8, 'space_after': 8, 'line_spacing': 1.0, 'first_line_indent': 0},
     5: {'style_name': 'Heading 5', 'font_name': 'Times New Roman','cz_font_name': '宋体', 'font_size': 10.5, 'bold': False, 'space_before': 6, 'space_after': 6, 'line_spacing': 1.0, 'first_line_indent': 0},
     6: {'style_name': 'Heading 6', 'font_name': 'Arial','cz_font_name': '宋体', 'font_size': 9, 'bold': False, 'space_before': 2, 'space_after': 2, 'line_spacing': 1.0, 'first_line_indent': 0},
-    7: {'style_name': 'Heading 7', 'font_name': 'Arial','cz_font_name': '宋体', 'font_size': 8, 'bold': False, 'space_before': 0, 'space_after': 0, 'line_spacing': 1.0, 'first_line_indent': 18},
-    8: {'style_name': 'Heading 8', 'font_name': 'Arial','cz_font_name': '宋体', 'font_size': 7, 'bold': False, 'space_before': 0, 'space_after': 0, 'line_spacing': 1.0, 'first_line_indent': 18},
-    9: {'style_name': 'Heading 9', 'font_name': 'Arial','cz_font_name': '宋体', 'font_size': 6, 'bold': False, 'space_before': 0, 'space_after': 0, 'line_spacing': 1.0, 'first_line_indent': 18},
+    7: {'style_name': 'Heading 7', 'font_name': 'Arial','cz_font_name': '宋体', 'font_size': 8, 'bold': False, 'space_before': 0, 'space_after': 0, 'line_spacing': 1.0, 'first_line_indent': 0},
+    8: {'style_name': 'Heading 8', 'font_name': 'Arial','cz_font_name': '宋体', 'font_size': 7, 'bold': False, 'space_before': 0, 'space_after': 0, 'line_spacing': 1.0, 'first_line_indent': 0},
+    9: {'style_name': 'Heading 9', 'font_name': 'Arial','cz_font_name': '宋体', 'font_size': 6, 'bold': False, 'space_before': 0, 'space_after': 0, 'line_spacing': 1.0, 'first_line_indent': 0},
 
 }
 
@@ -29,6 +29,7 @@ bdy_space_before = Pt(6)  # 段前行距
 bdy_space_after = Pt(6)  # 段后行距
 bdy_line_spacing = 1.0  #行距
 bdy_first_line_indent = Pt(2)  # 首行缩进
+bdy_left_indent = Pt(0)
 
 # 表格格式
 tbl_cz_font_name = "宋体"  # 中文字体
@@ -37,6 +38,8 @@ tbl_font_size = Pt(10.5)  # 表格字号
 tbl_space_before = Pt(6)  # 表格段前行距
 tbl_space_after = Pt(6)  # 表格段后行距
 tbl_line_spacing = 1.0  #行距
+tbl_first_line_indent = Pt(0)  # 首行缩进
+tbl_left_indent = Pt(0)
 tbl_width = Inches(6)
 
 def get_outline_level_from_xml(p):
@@ -83,7 +86,12 @@ def number_to_chinese(number):
         return chinese_numbers[tens] + "十" + (chinese_numbers[ones] if ones != 0 else "")
     else:
         return "一百"
-   
+
+def circled_num(n: int) -> str:
+    if 1 <= n <= 20:                       # 目前 Unicode 只到 ⑳
+        return chr(0x245F + n)             # 0x2460 - 1 + n
+    return str(n)                          # 超出 fallback
+    
 # 添加标题序号并清洗原有序号
 def add_heading_numbers(doc):
     # 初始化标题序号
@@ -100,7 +108,7 @@ def add_heading_numbers(doc):
         elif level == 3:
             return f"（{number}）"  # 第四层级：（1）（2）（3）
         elif level == 4:
-            return f"{number}."  # 第五层级：1.2.3.
+            return f"{circled_num(i)} "  # 第五层级：1.2.3.
         elif level == 5:
             return f"（{number}）"  # 第六层级：（1）（2）（3）
         elif level == 6:
@@ -167,6 +175,7 @@ def modify_document_format(doc):
             paragraph.paragraph_format.space_after = bdy_space_after
             paragraph.paragraph_format.line_spacing = bdy_line_spacing
             paragraph.paragraph_format.first_line_indent = bdy_first_line_indent
+            paragraph.paragraph_format.left_indent = byd_left_indent
             # 修改字体字号
             for run in paragraph.runs:
                 set_font(run, bdy_cz_font_name, bdy_font_name)
@@ -191,6 +200,8 @@ def modify_document_format(doc):
                     paragraph.paragraph_format.space_before = tbl_space_before
                     paragraph.paragraph_format.space_after = tbl_space_after
                     paragraph.paragraph_format.line_spacing = tbl_line_spacing
+                    paragraph.paragraph_format.first_line_indent = tbl_first_line_indent
+                    paragraph.paragraph_format.left_indent = tbl_left_indent
 
 def process_doc(uploaded_bytes):
     doc = Document(BytesIO(uploaded_bytes))
@@ -214,6 +225,7 @@ if f and st.button("开始排版"):
         out = process_doc(f.read())
     st.download_button("下载已排版文件", data=out,
                    file_name=f"{f.name.replace('.docx', '')}_已排版.docx")
+
 
 
 
