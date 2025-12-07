@@ -10,15 +10,15 @@ from docx.shared import Cm
 
 # 标题样式
 style_rules = {
-    1: {'style_name': 'Heading 1', 'font_name': 'Arial','cz_font_name': '黑体', 'font_size': 14, 'bold': True, 'space_before': 12, 'space_after': 12, 'line_spacing': 1.5, 'first_line_indent': 0,'left_indent': 0},
-    2: {'style_name': 'Heading 2', 'font_name': 'Arial','cz_font_name': '黑体', 'font_size': 12, 'bold': True, 'space_before': 12, 'space_after': 12, 'line_spacing': 1.5, 'first_line_indent': 0.75,'left_indent': 0},
-    3: {'style_name': 'Heading 3', 'font_name': 'Times New Roman','cz_font_name': '宋体','font_size': 10.5, 'bold': False, 'space_before': 8, 'space_after': 8, 'line_spacing': 1.0, 'first_line_indent': 1.5,'left_indent': 0},
-    4: {'style_name': 'Heading 4', 'font_name': 'Times New Roman','cz_font_name': '宋体', 'font_size': 10.5, 'bold': False, 'space_before': 8, 'space_after': 8, 'line_spacing': 1.0, 'first_line_indent': 2.25,'left_indent': 0},
-    5: {'style_name': 'Heading 5', 'font_name': 'Times New Roman','cz_font_name': '宋体', 'font_size': 10.5, 'bold': False, 'space_before': 6, 'space_after': 6, 'line_spacing': 1.0, 'first_line_indent': 3.0,'left_indent': 0},
-    6: {'style_name': 'Heading 6', 'font_name': 'Arial','cz_font_name': '宋体', 'font_size': 9, 'bold': False, 'space_before': 2, 'space_after': 2, 'line_spacing': 1.0, 'first_line_indent': 0,'left_indent': 0},
-    7: {'style_name': 'Heading 7', 'font_name': 'Arial','cz_font_name': '宋体', 'font_size': 8, 'bold': False, 'space_before': 0, 'space_after': 0, 'line_spacing': 1.0, 'first_line_indent': 0,'left_indent': 0},
-    8: {'style_name': 'Heading 8', 'font_name': 'Arial','cz_font_name': '宋体', 'font_size': 7, 'bold': False, 'space_before': 0, 'space_after': 0, 'line_spacing': 1.0, 'first_line_indent': 0,'left_indent': 0},
-    9: {'style_name': 'Heading 9', 'font_name': 'Arial','cz_font_name': '宋体', 'font_size': 6, 'bold': False, 'space_before': 0, 'space_after': 0, 'line_spacing': 1.0, 'first_line_indent': 0,'left_indent': 0},
+    1: {'style_name': 'Heading 1', 'font_name': 'Arial','cz_font_name': '黑体', 'font_size': 14, 'bold': True, 'space_before': 12, 'space_after': 12, 'line_spacing': 1.5, 'first_line_indent': 0},
+    2: {'style_name': 'Heading 2', 'font_name': 'Arial','cz_font_name': '黑体', 'font_size': 12, 'bold': True, 'space_before': 12, 'space_after': 12, 'line_spacing': 1.5, 'first_line_indent': 0.75},
+    3: {'style_name': 'Heading 3', 'font_name': 'Times New Roman','cz_font_name': '宋体','font_size': 10.5, 'bold': False, 'space_before': 8, 'space_after': 8, 'line_spacing': 1.0, 'first_line_indent': 1.5},
+    4: {'style_name': 'Heading 4', 'font_name': 'Times New Roman','cz_font_name': '宋体', 'font_size': 10.5, 'bold': False, 'space_before': 8, 'space_after': 8, 'line_spacing': 1.0, 'first_line_indent': 2.25},
+    5: {'style_name': 'Heading 5', 'font_name': 'Times New Roman','cz_font_name': '宋体', 'font_size': 10.5, 'bold': False, 'space_before': 6, 'space_after': 6, 'line_spacing': 1.0, 'first_line_indent': 3.0},
+    6: {'style_name': 'Heading 6', 'font_name': 'Arial','cz_font_name': '宋体', 'font_size': 9, 'bold': False, 'space_before': 2, 'space_after': 2, 'line_spacing': 1.0, 'first_line_indent': 0},
+    7: {'style_name': 'Heading 7', 'font_name': 'Arial','cz_font_name': '宋体', 'font_size': 8, 'bold': False, 'space_before': 0, 'space_after': 0, 'line_spacing': 1.0, 'first_line_indent': 0},
+    8: {'style_name': 'Heading 8', 'font_name': 'Arial','cz_font_name': '宋体', 'font_size': 7, 'bold': False, 'space_before': 0, 'space_after': 0, 'line_spacing': 1.0, 'first_line_indent': 0},
+    9: {'style_name': 'Heading 9', 'font_name': 'Arial','cz_font_name': '宋体', 'font_size': 6, 'bold': False, 'space_before': 0, 'space_after': 0, 'line_spacing': 1.0, 'first_line_indent': 0},
 
 }
 
@@ -30,7 +30,6 @@ bdy_space_before = Pt(6)  # 段前行距
 bdy_space_after = Pt(6)  # 段后行距
 bdy_line_spacing = 1.0  #行距
 bdy_first_line_indent = Cm(0.75)  # 首行缩进
-bdy_left_indent = Cm(0)
 
 # 表格格式
 tbl_cz_font_name = "宋体"  # 中文字体
@@ -39,10 +38,32 @@ tbl_font_size = Pt(10.5)  # 表格字号
 tbl_space_before = Pt(6)  # 表格段前行距
 tbl_space_after = Pt(6)  # 表格段后行距
 tbl_line_spacing = 1.0  #行距
-tbl_first_line_indent = Pt(0)  # 首行缩进
-tbl_left_indent = Cm(0)
 tbl_width = Inches(6)
 
+def zero_indent(p):
+    pf = p.paragraph_format
+    pf.left_indent       = Cm(0)
+    pf.first_line_indent = Cm(0)
+    pf.right_indent      = Cm(0)
+    pf.tab_stops.clear_all()   # 清制表位
+    # 再删段首空格/Tab
+    if p.text:
+        p.text = p.text.lstrip()
+
+def kill_all_numbering(doc):
+    """样式级 + 段落级 编号全部清零"""
+    # 1. 样式级：把所有带 numId 的样式拔掉
+    for st_name in ['List Paragraph', 'Heading 1', 'Heading 2', 'Heading 3',
+                    'Heading 4', 'Heading 5', 'Heading 6', 'Heading 7',
+                    'Heading 8', 'Heading 9']:
+        try:
+            style = doc.styles[st_name]
+        except KeyError:
+            continue
+        style_el = style._element
+        for num_id in style_el.xpath('.//w:numId'):
+            num_id.getparent().remove(num_id) 
+            
 def get_outline_level_from_xml(p):
     """
     从段落的XML中提取大纲级别，并加1
@@ -87,23 +108,7 @@ def number_to_chinese(number):
         return chinese_numbers[tens] + "十" + (chinese_numbers[ones] if ones != 0 else "")
     else:
         return "一百"
-
-def kill_all_numbering(doc):
-    """样式级 + 段落级 编号全部清零"""
-    # 1. 样式级：把所有带 numId 的样式拔掉
-    for st_name in ['List Paragraph', 'Heading 1', 'Heading 2', 'Heading 3',
-                    'Heading 4', 'Heading 5', 'Heading 6', 'Heading 7',
-                    'Heading 8', 'Heading 9']:
-        try:
-            style = doc.styles[st_name]
-        except KeyError:
-            continue
-        style_el = style._element
-        for num_id in style_el.xpath('.//w:numId'):
-            num_id.getparent().remove(num_id) 
-            
-
-            
+           
 # 添加标题序号
 def add_heading_numbers(doc):
     
@@ -149,9 +154,11 @@ def add_heading_numbers(doc):
 
     # 遍历文档中的所有段落
     for paragraph in doc.paragraphs:
+        for p in doc.paragraphs:
+            zero_indent(p)
         # 检查段落是否是标题
         if paragraph.style.name.startswith('Heading'):
-            #清洗序号
+            #清洗手写序号
             for p in doc.paragraphs:
                 p_pr = p._p.get_or_add_pPr()
                 num_pr = p_pr.find(qn('w:numPr'))
@@ -192,7 +199,6 @@ def modify_document_format(doc):
                     paragraph.style.paragraph_format.space_after = Pt(rule['space_after'])
                     paragraph.style.paragraph_format.line_spacing = rule['line_spacing']
                     paragraph.style.paragraph_format.first_line_indent = Cm(rule['first_line_indent'])
-                    paragraph.paragraph_format.left_indent = Cm(rule['left_indent'])
                     # 修改字体字号和粗体
                     for run in paragraph.runs:
                         set_font(run, rule['cz_font_name'], rule['font_name'])
@@ -204,7 +210,6 @@ def modify_document_format(doc):
             paragraph.paragraph_format.space_after = bdy_space_after
             paragraph.paragraph_format.line_spacing = bdy_line_spacing
             paragraph.paragraph_format.first_line_indent = bdy_first_line_indent
-            paragraph.paragraph_format.left_indent = bdy_left_indent
             # 修改字体字号
             for run in paragraph.runs:
                 set_font(run, bdy_cz_font_name, bdy_font_name)
@@ -230,7 +235,6 @@ def modify_document_format(doc):
                     paragraph.paragraph_format.space_after = tbl_space_after
                     paragraph.paragraph_format.line_spacing = tbl_line_spacing
                     paragraph.paragraph_format.first_line_indent = tbl_first_line_indent
-                    paragraph.paragraph_format.left_indent = tbl_left_indent
 
 def process_doc(uploaded_bytes):
     doc = Document(BytesIO(uploaded_bytes))
@@ -255,6 +259,7 @@ if f and st.button("开始排版"):
         out = process_doc(f.read())
     st.download_button("下载已排版文件", data=out,
                    file_name=f"{f.name.replace('.docx', '')}_已排版.docx")
+
 
 
 
