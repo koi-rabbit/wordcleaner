@@ -95,11 +95,6 @@ def circled_num(n: int) -> str:
 
 import re
 from docx.shared import Cm
-
-# 清“手动文本”序号（扩大版）
-
-
-
                     
 # 添加标题序号
 def add_heading_numbers(doc):
@@ -112,7 +107,6 @@ def add_heading_numbers(doc):
         r'\s*',                                        # 尾部空格
         re.UNICODE
     )
-    paragraph.text = number_pattern.sub('', paragraph.text).strip()
     
     # 初始化标题序号
     heading_numbers = [0, 0, 0, 0, 0, 0, 0, 0, 0]  # 假设最多有九级标题
@@ -142,6 +136,12 @@ def add_heading_numbers(doc):
 
     # 遍历文档中的所有段落
     for paragraph in doc.paragraphs:
+        for p in doc.paragraphs:
+            p_pr = p._p.get_or_add_pPr()
+            num_pr = p_pr.find(qn('w:numPr'))
+            if num_pr is not None:
+                p_pr.remove(num_pr)
+        paragraph.text = number_pattern.sub('', paragraph.text).strip()
         # 检查段落是否是标题
         if paragraph.style.name.startswith('Heading'):
             # 获取标题级别
@@ -167,11 +167,6 @@ def modify_document_format(doc):
     """    
     # 遍历文档中的每个段落
     for paragraph in doc.paragraphs:
-        for p in doc.paragraphs:
-            p_pr = p._p.get_or_add_pPr()
-            num_pr = p_pr.find(qn('w:numPr'))
-            if num_pr is not None:
-                p_pr.remove(num_pr)
         # 检查是否是标题（标题的 style 通常以 "Heading" 开头）
         if  paragraph.style.name.startswith("Heading"):
             style_name = paragraph.style.name
@@ -244,6 +239,7 @@ if f and st.button("开始排版"):
         out = process_doc(f.read())
     st.download_button("下载已排版文件", data=out,
                    file_name=f"{f.name.replace('.docx', '')}_已排版.docx")
+
 
 
 
