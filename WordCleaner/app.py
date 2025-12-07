@@ -192,7 +192,7 @@ def modify_document_format(doc):
                     paragraph.style.paragraph_format.space_after = Pt(rule['space_after'])
                     paragraph.style.paragraph_format.line_spacing = rule['line_spacing']
                     paragraph.style.paragraph_format.first_line_indent = Cm(rule['first_line_indent'])
-                    paragraph.paragraph_format.left_indent = Cm(rule['left_indent']
+                    paragraph.paragraph_format.left_indent = Cm(rule['left_indent'])
                     # 修改字体字号和粗体
                     for run in paragraph.runs:
                         set_font(run, rule['cz_font_name'], rule['font_name'])
@@ -255,6 +255,7 @@ if f and st.button("开始排版"):
         out = process_doc(f.read())
     st.download_button("下载已排版文件", data=out,
                    file_name=f"{f.name.replace('.docx', '')}_已排版.docx")
+
 
 
 
