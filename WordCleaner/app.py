@@ -35,8 +35,8 @@ bdy_first_line_indent = Cm(0.75)  # 首行缩进
 tbl_cz_font_name = "宋体"  # 中文字体
 tbl_font_name = "Times New Roman"  # 英文字体
 tbl_font_size = Pt(10.5)  # 表格字号
-tbl_space_before = Pt(6)  # 表格段前行距
-tbl_space_after = Pt(6)  # 表格段后行距
+tbl_space_before = Pt(4)  # 表格段前行距
+tbl_space_after = Pt(4)  # 表格段后行距
 tbl_line_spacing = 1.0  #行距
 tbl_width = Inches(6)
 
@@ -257,6 +257,7 @@ if f and st.button("开始排版"):
         out = process_doc(f.read())
     st.download_button("下载已排版文件", data=out,
                    file_name=f"{f.name.replace('.docx', '')}_已排版.docx")
+
 
 
 
