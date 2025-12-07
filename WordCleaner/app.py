@@ -212,6 +212,7 @@ if f and st.button("开始排版"):
     with st.spinner("处理中…"):
         out = process_doc(f.read())
     st.download_button("下载已排版文件", data=out,
-                       file_name=f"{f.name.stem}_已排版.docx")
+                   file_name=f"{f.name.replace('.docx', '')}_已排版.docx")
+
 
 
