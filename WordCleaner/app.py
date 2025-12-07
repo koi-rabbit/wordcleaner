@@ -97,35 +97,18 @@ import re
 from docx.shared import Cm
 
 # 清“手动文本”序号（扩大版）
-raw_num_re = re.compile(
-    r'(?:^[①-⑳]\s*|^[一二三四五六七八九十零]{1,3}[\.、]?\s*|'
-    r'^\d{1,2}[\.\-\—]\s*|^[（(]?\s*\d{1,2}[）)]\s*)+', re.UNICODE)
 
-def strip_manual_number(p):
-    """把段落最前面各种手写序号削掉"""
-    p.text = raw_num_re.sub('', p.text).strip()
 
-def atomic_strip(p):
-    """先拼出纯文本，再清全部 Run，最后写回去"""
-    raw   = p.text                          # 当前可见文本
-    clean = raw_num_re.sub('', raw).strip()
-    # 清空所有 Run
-    for r in p._p.xpath('.//w:r'):
-        p._p.remove(r)
-    # 加一个全新 Run
-    p.add_run(clean)
 
-def remove_all_numbers(doc):
-    for p in doc.paragraphs:
-        atomic_strip(p)
-    for tbl in doc.tables:
-        for row in tbl.rows:
-            for cell in row.cells:
-                for p in cell.paragraphs:
-                    atomic_strip(p)
                     
-# 添加标题序号并清洗原有序
+# 添加标题序号
 def add_heading_numbers(doc):
+    
+    raw_num_re = re.compile(
+        r'(?:^[①-⑳]\s*|^[一二三四五六七八九十零]{1,3}[\.、]?\s*|'
+        r'^\d{1,2}[\.\-\—]\s*|^[（(]?\s*\d{1,2}[）)]\s*)+', re.UNICODE)
+    paragraph.text = number_pattern.sub('', paragraph.text).strip()
+    
     # 初始化标题序号
     heading_numbers = [0, 0, 0, 0, 0, 0, 0, 0, 0]  # 假设最多有九级标题
 
@@ -179,6 +162,11 @@ def modify_document_format(doc):
     """    
     # 遍历文档中的每个段落
     for paragraph in doc.paragraphs:
+        for p in doc.paragraphs:
+            p_pr = p._p.get_or_add_pPr()
+            num_pr = p_pr.find(qn('w:numPr'))
+            if num_pr is not None:
+                p_pr.remove(num_pr)
         # 检查是否是标题（标题的 style 通常以 "Heading" 开头）
         if  paragraph.style.name.startswith("Heading"):
             style_name = paragraph.style.name
@@ -236,7 +224,6 @@ def process_doc(uploaded_bytes):
         lvl = get_outline_level_from_xml(para)
         if lvl and para.style.name == "Normal":
             para.style = doc.styles[f"Heading {lvl}"]
-    remove_all_numbers(doc)
     add_heading_numbers(doc)
     modify_document_format(doc)
     buffer = BytesIO()
@@ -252,6 +239,7 @@ if f and st.button("开始排版"):
         out = process_doc(f.read())
     st.download_button("下载已排版文件", data=out,
                    file_name=f"{f.name.replace('.docx', '')}_已排版.docx")
+
 
 
 
