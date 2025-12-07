@@ -92,8 +92,39 @@ def circled_num(n: int) -> str:
     if 1 <= n <= 20:                       # 目前 Unicode 只到 ⑳
         return chr(0x245F + n)             # 0x2460 - 1 + n
     return str(n)                          # 超出 fallback
-    
-# 添加标题序号并清洗原有序号
+
+import re
+from docx.shared import Cm
+
+# 1. 清“手动文本”序号（扩大版）
+raw_num_re = re.compile(
+    r'(?:^[①-⑳]\s*|^[一二三四五六七八九十零]{1,3}[\.、]?\s*|'
+    r'^\d{1,2}[\.\-\—]\s*|^[（(]?\s*\d{1,2}[）)]\s*)+', re.UNICODE)
+
+def strip_manual_number(p):
+    """把段落最前面各种手写序号削掉"""
+    p.text = raw_num_re.sub('', p.text).strip()
+
+def strip_list_field(p):
+    """删掉 Word 多级列表字段（numPr）"""
+    pPr = p._p.get_or_add_pPr()
+    numPr = pPr.find(qn('w:numPr'))
+    if numPr is not None:
+        pPr.remove(numPr)
+
+def remove_all_numbers(doc):
+    """遍历全文档，文本+字段双杀"""
+    for p in doc.paragraphs:
+        strip_manual_number(p)   # ① 清文本
+        strip_list_field(p)      # ② 清字段
+    for tbl in doc.tables:
+        for row in tbl.rows:
+            for cell in row.cells:
+                for p in cell.paragraphs:
+                    strip_manual_number(p)
+                    strip_list_field(p)
+                    
+# 添加标题序号并清洗原有序
 def add_heading_numbers(doc):
     # 初始化标题序号
     heading_numbers = [0, 0, 0, 0, 0, 0, 0, 0, 0]  # 假设最多有九级标题
@@ -121,25 +152,12 @@ def add_heading_numbers(doc):
         else:
             return f"{number}."  # 默认格式
 
-    # 定义正则表达式，匹配常见的序号格式
-    number_pattern = re.compile(
-        r'^[（(]?'                                      # 可选左括号（全角/半角）
-        r'[\d一二三四五六七八九十零]{1,3}'             # 数字或中文数字
-        r'[\.、）)]?'                                   # 可选点号或右括号
-        r'(\s+[（(]?\s*[\d一二三四五六七八九十零]{1,3}[\.、）)]?)*'  # 同类碎片可再出现
-        r'\s*',                                        # 尾部空格
-        re.UNICODE
-    )
-
     # 遍历文档中的所有段落
     for paragraph in doc.paragraphs:
         # 检查段落是否是标题
         if paragraph.style.name.startswith('Heading'):
             # 获取标题级别
             level = int(paragraph.style.name.split(' ')[1]) - 1
-
-            # 清洗原文档中的序号
-            paragraph.text = number_pattern.sub('', paragraph.text).strip()
 
             # 更新序号
             heading_numbers[level] += 1
@@ -218,6 +236,7 @@ def process_doc(uploaded_bytes):
         lvl = get_outline_level_from_xml(para)
         if lvl and para.style.name == "Normal":
             para.style = doc.styles[f"Heading {lvl}"]
+    remove_all_numbers(doc)
     add_heading_numbers(doc)
     modify_document_format(doc)
     buffer = BytesIO()
@@ -233,6 +252,7 @@ if f and st.button("开始排版"):
         out = process_doc(f.read())
     st.download_button("下载已排版文件", data=out,
                    file_name=f"{f.name.replace('.docx', '')}_已排版.docx")
+
 
 
 
