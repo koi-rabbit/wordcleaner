@@ -175,7 +175,7 @@ def modify_document_format(doc):
             paragraph.paragraph_format.space_after = bdy_space_after
             paragraph.paragraph_format.line_spacing = bdy_line_spacing
             paragraph.paragraph_format.first_line_indent = bdy_first_line_indent
-            paragraph.paragraph_format.left_indent = byd_left_indent
+            paragraph.paragraph_format.left_indent = bdy_left_indent
             # 修改字体字号
             for run in paragraph.runs:
                 set_font(run, bdy_cz_font_name, bdy_font_name)
@@ -225,6 +225,7 @@ if f and st.button("开始排版"):
         out = process_doc(f.read())
     st.download_button("下载已排版文件", data=out,
                    file_name=f"{f.name.replace('.docx', '')}_已排版.docx")
+
 
 
 
