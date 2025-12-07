@@ -154,8 +154,6 @@ def add_heading_numbers(doc):
 
     # 遍历文档中的所有段落
     for paragraph in doc.paragraphs:
-        for p in doc.paragraphs:
-            zero_indent(p)
         # 检查段落是否是标题
         if paragraph.style.name.startswith('Heading'):
             #清洗手写序号
@@ -259,6 +257,7 @@ if f and st.button("开始排版"):
         out = process_doc(f.read())
     st.download_button("下载已排版文件", data=out,
                    file_name=f"{f.name.replace('.docx', '')}_已排版.docx")
+
 
 
 
