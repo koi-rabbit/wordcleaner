@@ -93,9 +93,20 @@ def circled_num(n: int) -> str:
         return chr(0x245F + n)             # 0x2460 - 1 + n
     return str(n)                          # 超出 fallback
 
-import re
-from docx.shared import Cm
-                    
+def kill_all_numbering(doc):
+    """样式级 + 段落级 编号全部清零"""
+    # 1. 样式级：把所有带 numId 的样式拔掉
+    for st_name in ['List Paragraph', 'Heading 1', 'Heading 2', 'Heading 3',
+                    'Heading 4', 'Heading 5', 'Heading 6', 'Heading 7',
+                    'Heading 8', 'Heading 9']:
+        try:
+            style = doc.styles[st_name]
+        except KeyError:
+            continue
+        style_el = style._element
+        for num_id in style_el.xpath('.//w:numId'):
+            num_id.getparent().remove(num_id) 
+            
 # 添加标题序号
 def add_heading_numbers(doc):
     
@@ -224,6 +235,7 @@ def process_doc(uploaded_bytes):
         lvl = get_outline_level_from_xml(para)
         if lvl and para.style.name == "Normal":
             para.style = doc.styles[f"Heading {lvl}"]
+    kill_all_numbering(doc)
     add_heading_numbers(doc)
     modify_document_format(doc)
     buffer = BytesIO()
@@ -239,6 +251,7 @@ if f and st.button("开始排版"):
         out = process_doc(f.read())
     st.download_button("下载已排版文件", data=out,
                    file_name=f"{f.name.replace('.docx', '')}_已排版.docx")
+
 
 
 
