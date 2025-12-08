@@ -6,7 +6,60 @@ from io import BytesIO
 from docx.shared import Pt, Inches
 from docx.oxml.ns import qn
 from docx.shared import Cm
-# ……后面直接粘你原来的常量、函数……
+
+# -------------- 默认值 --------------
+DEFAULTS = {
+    # 正文
+    "bdy_cz_font_name": "宋体",
+    "bdy_font_name": "Times New Roman",
+    "bdy_font_size": 10.5,
+    "bdy_space_before": 6,
+    "bdy_space_after": 6,
+    "bdy_line_spacing": 1.0,
+    "bdy_first_line_indent": 0.75,
+    # 表格
+    "tbl_cz_font_name": "宋体",
+    "tbl_font_name": "Times New Roman",
+    "tbl_font_size": 10.5,
+    "tbl_space_before": 4,
+    "tbl_space_after": 4,
+    "tbl_line_spacing": 1.0,
+    "tbl_width": 6,
+}
+# -------------- 初始化 / 重置 --------------
+def init_state():
+    for k, v in DEFAULTS.items():
+        if k not in st.session_state:
+            st.session_state[k] = v
+
+init_state()
+
+# -------------- 侧边栏：参数面板 --------------
+with st.sidebar:
+    st.title("📏 格式参数")
+    st.markdown("---")
+    with st.expander("正文格式", expanded=True):
+        st.session_state["bdy_cz_font_name"] = st.text_input("中文字体", st.session_state["bdy_cz_font_name"])
+        st.session_state["bdy_font_name"] = st.text_input("英文字体", st.session_state["bdy_font_name"])
+        st.session_state["bdy_font_size"] = st.number_input("字号(pt)", 5.0, 30.0, st.session_state["bdy_font_size"], 0.5)
+        st.session_state["bdy_space_before"] = st.number_input("段前行距(pt)", 0, 50, st.session_state["bdy_space_before"])
+        st.session_state["bdy_space_after"] = st.number_input("段后行距(pt)", 0, 50, st.session_state["bdy_space_after"])
+        st.session_state["bdy_line_spacing"] = st.number_input("行距(倍)", 0.5, 3.0, st.session_state["bdy_line_spacing"], 0.1)
+        st.session_state["bdy_first_line_indent"] = st.number_input("首行缩进(cm)", 0.0, 5.0, st.session_state["bdy_first_line_indent"], 0.05)
+
+    with st.expander("表格格式", expanded=True):
+        st.session_state["tbl_cz_font_name"] = st.text_input("表格中文字体", st.session_state["tbl_cz_font_name"])
+        st.session_state["tbl_font_name"] = st.text_input("表格英文字体", st.session_state["tbl_font_name"])
+        st.session_state["tbl_font_size"] = st.number_input("表格字号(pt)", 5.0, 30.0, st.session_state["tbl_font_size"], 0.5)
+        st.session_state["tbl_space_before"] = st.number_input("表格段前行距(pt)", 0, 50, st.session_state["tbl_space_before"])
+        st.session_state["tbl_space_after"] = st.number_input("表格段后行距(pt)", 0, 50, st.session_state["tbl_space_after"])
+        st.session_state["tbl_line_spacing"] = st.number_input("表格行距(倍)", 0.5, 3.0, st.session_state["tbl_line_spacing"], 0.1)
+        st.session_state["tbl_width"] = st.number_input("表格宽度(inches)", 1.0, 10.0, st.session_state["tbl_width"], 0.1)
+
+    if st.button("重置全部参数"):
+        for k, v in DEFAULTS.items():
+            st.session_state[k] = v
+        st.rerun()
 
 # 标题样式
 style_rules = {
@@ -23,22 +76,22 @@ style_rules = {
 }
 
 # 正文格式
-bdy_cz_font_name = "宋体"  # 字体
-bdy_font_name = "Times New Roman"
-bdy_font_size = Pt(10.5)  # 字号
-bdy_space_before = Pt(6)  # 段前行距
-bdy_space_after = Pt(6)  # 段后行距
-bdy_line_spacing = 1.0  #行距
-bdy_first_line_indent = Cm(0.75)  # 首行缩进
+bdy_cz_font_name = st.session_state["bdy_cz_font_name"]  # 字体
+bdy_font_name = st.session_state["bdy_font_name"]
+bdy_font_size = Pt(st.session_state["bdy_font_size"])  # 字号
+bdy_space_before = Pt(st.session_state["bdy_space_before"])  # 段前行距
+bdy_space_after = Pt(st.session_state["bdy_space_after"])  # 段后行距
+bdy_line_spacing = st.session_state["bdy_line_spacing"]  #行距
+bdy_first_line_indent = Cm(st.session_state["bdy_first_line_indent"])  # 首行缩进
 
 # 表格格式
-tbl_cz_font_name = "宋体"  # 中文字体
-tbl_font_name = "Times New Roman"  # 英文字体
-tbl_font_size = Pt(10.5)  # 表格字号
-tbl_space_before = Pt(4)  # 表格段前行距
-tbl_space_after = Pt(4)  # 表格段后行距
-tbl_line_spacing = 1.0  #行距
-tbl_width = Inches(6)
+tbl_cz_font_name = st.session_state["tbl_cz_font_name"]  # 中文字体
+tbl_font_name = st.session_state["tbl_font_name"]  # 英文字体
+tbl_font_size = Pt(st.session_state["tbl_font_size"])  # 表格字号
+tbl_space_before = Pt(st.session_state["tbl_space_before"])  # 表格段前行距
+tbl_space_after = Pt(st.session_state["tbl_space_after"])  # 表格段后行距
+tbl_line_spacing = st.session_state["tbl_line_spacing"]  #行距
+tbl_width = Inches(st.session_state["tbl_width"])
 
 def zero_indent(p):
     pf = p.paragraph_format
@@ -251,12 +304,26 @@ def process_doc(uploaded_bytes):
 
 # ---------------- Streamlit 界面 ----------------
 st.title("Word 自动排版")
-f = st.file_uploader("上传docx", type="docx")
-if f and st.button("开始排版"):
-    with st.spinner("处理中…"):
-        out = process_doc(f.read())
-    st.download_button("下载已排版文件", data=out,
-                   file_name=f"{f.name.replace('.docx', '')}_已排版.docx")
+
+files = st.file_uploader("上传一个或多个 docx",
+                         type=["docx"],
+                         accept_multiple_files=True)
+
+if files and st.button("开始批量排版"):
+    if len(files) == 0:
+        st.warning("请先上传文件")
+        st.stop()
+
+    with st.spinner(f"共 {len(files)} 个文件，正在逐个处理…"):
+        for f in files:
+            out_buffer = process_doc(f.read())
+            st.download_button(
+                label=f"下载 ➤ {f.name.replace('.docx', '')}_已排版.docx",
+                data=out_buffer,
+                file_name=f"{f.name.replace('.docx', '')}_已排版.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
+
 
 
 
