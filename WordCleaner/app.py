@@ -13,18 +13,18 @@ DEFAULTS = {
     "bdy_cz_font_name": "宋体",
     "bdy_font_name": "Times New Roman",
     "bdy_font_size": 10.5,
-    "bdy_space_before": 6,
-    "bdy_space_after": 6,
+    "bdy_space_before": 6.0,
+    "bdy_space_after": 6.0,
     "bdy_line_spacing": 1.0,
     "bdy_first_line_indent": 0.75,
     # 表格
     "tbl_cz_font_name": "宋体",
     "tbl_font_name": "Times New Roman",
     "tbl_font_size": 10.5,
-    "tbl_space_before": 4,
-    "tbl_space_after": 4,
+    "tbl_space_before": 4.0,
+    "tbl_space_after": 4.0,
     "tbl_line_spacing": 1.0,
-    "tbl_width": 6,
+    "tbl_width": 6.0,
 }
 # -------------- 初始化 / 重置 --------------
 def init_state():
@@ -323,6 +323,7 @@ if files and st.button("开始批量排版"):
                 file_name=f"{f.name.replace('.docx', '')}_已排版.docx",
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             )
+
 
 
 
