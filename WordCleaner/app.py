@@ -195,7 +195,7 @@ def add_heading_numbers(doc):
         r'^\s*'                                      # 前导空格
         r'[（(]?'                                     # 可选左括号
         r'[\d一二三四五六七八九十零]{1,3}'            # 数字
-        r'[\.、）)]'                                  # 分隔符
+        r'[\.、）)\s]'                                # 分隔符
         r'(?:[（(]?\s*[\d一二三四五六七八九十零]{1,3}[\.、）)]\s*)*'  # 后续级
         #  去掉 \s*$  —— 不要整行匹配
         , re.UNICODE
@@ -347,6 +347,7 @@ if files and st.button("开始批量排版"):
                 file_name=f"{f.name.replace('.docx', '')}_已排版.docx",
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             )
+
 
 
 
