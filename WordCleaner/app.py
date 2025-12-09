@@ -122,27 +122,7 @@ def restructure_outline(doc):
             headings_idx.append(idx)
             if not p.text.strip():          # 空
                 p.style = doc.styles["Normal"]
-
-    # ---------- 3. 降级：尾部无正文 ----------
-    # 从后往前扫，记录“后面有没有正文”
-    for idx in reversed(headings_idx):
-        p = doc.paragraphs[idx]
-        if p.style.name == "Normal":  # 已被空标题降级，跳过
-            continue
-    
-        # 🔍 每个标题单独检查后面有没有正文
-        has_content = False
-        for j in range(idx + 1, len(doc.paragraphs)):
-            q = doc.paragraphs[j]
-            if q.style.name.startswith("Heading"):
-                break
-            if q.text.strip():
-                has_content = True
-                break
-    
-        if not has_content:
-            p.style = doc.styles["Normal"]
-            
+           
 def zero_indent(p):
     pf = p.paragraph_format
     pf.left_indent       = Cm(0)
@@ -207,11 +187,12 @@ def number_to_chinese(number):
 def add_heading_numbers(doc):
     
     number_pattern = re.compile(
-        r'^[（(]?'                                      # 可选左括号（全角/半角）
-        r'[\d一二三四五六七八九十零]{1,3}'             # 数字或中文数字
-        r'[\.、）)]?'                                   # 可选点号或右括号
-        r'(\s+[（(]?\s*[\d一二三四五六七八九十零]{1,3}[\.、）)]?)*'  # 同类碎片可再出现
-        r'\s*',                                        # 尾部空格
+        r'^\s*'                                      # 前导空格
+        r'[（(]?'                                     # 可选左括号（全角/半角）
+        r'[\d一二三四五六七八九十零]{1,3}'            # 首位数字（阿拉伯或中文）
+        r'[\.、）)]'                                  # 必须跟一个点号/顿号/右括号（把“锚”做实）
+        r'(?:[（(]?\s*[\d一二三四五六七八九十零]{1,3}[\.、）)]\s*)*'  # 后面可再出现“数字+点/顿/括号”
+        r'\s*$',                                     # 尾部空格
         re.UNICODE
     )
     
@@ -360,5 +341,6 @@ if files and st.button("开始批量排版"):
                 file_name=f"{f.name.replace('.docx', '')}_已排版.docx",
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             )
+
 
 
