@@ -125,12 +125,13 @@ def restructure_outline(doc):
 
     # ---------- 3. 降级：尾部无正文 ----------
     # 从后往前扫，记录“后面有没有正文”
-    has_content = False
     for idx in reversed(headings_idx):
         p = doc.paragraphs[idx]
-        if p.style.name == "Normal":        # 已被空标题降级，跳过
+        if p.style.name == "Normal":  # 已被空标题降级，跳过
             continue
-        # 看后面有没有正文
+    
+        # 🔍 每个标题单独检查后面有没有正文
+        has_content = False
         for j in range(idx + 1, len(doc.paragraphs)):
             q = doc.paragraphs[j]
             if q.style.name.startswith("Heading"):
@@ -138,11 +139,9 @@ def restructure_outline(doc):
             if q.text.strip():
                 has_content = True
                 break
-        if not has_content:                 # 直到文末都没正文
+    
+        if not has_content:
             p.style = doc.styles["Normal"]
-        # 一旦后面出现正文，之后更靠前的标题都保留
-        else:
-            break
             
 def zero_indent(p):
     pf = p.paragraph_format
@@ -361,33 +360,5 @@ if files and st.button("开始批量排版"):
                 file_name=f"{f.name.replace('.docx', '')}_已排版.docx",
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
