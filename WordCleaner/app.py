@@ -93,6 +93,13 @@ tbl_space_after = Pt(st.session_state["tbl_space_after"])  # 表格段后行距
 tbl_line_spacing = st.session_state["tbl_line_spacing"]  #行距
 tbl_width = Inches(st.session_state["tbl_width"])
 
+KNOWN_STYLES = {
+    "Normal",
+    "List Paragraph",
+    "Heading 1", "Heading 2", "Heading 3", "Heading 4",
+    "Heading 5", "Heading 6", "Heading 7", "Heading 8", "Heading 9"
+}
+
 def get_outline_level_from_xml(p):
     """
     从段落的XML中提取大纲级别，并加1
@@ -146,8 +153,6 @@ def kill_all_numbering(doc):
         style_el = style._element
         for num_id in style_el.xpath('.//w:numId'):
             num_id.getparent().remove(num_id) 
-            
-
                
 def set_font(run, cz_font_name, font_name):
     """
@@ -258,59 +263,55 @@ def modify_document_format(doc):
 
     :param file_path: 输入的 Word 文档路径
     :param output_path: 输出的 Word 文档路径，默认为 "modified.docx"
-    """    
-    # 遍历文档中的每个段落
-    for paragraph in doc.paragraphs:
-        # 检查是否是标题（标题的 style 通常以 "Heading" 开头）
-        if  paragraph.style.name.startswith("Heading"):
-            style_name = paragraph.style.name
-            # 查找匹配的样式规则
-            for level, rule in style_rules.items():
-                if rule['style_name'] == style_name:
-                    # 修改段前段后行距和首行缩进
-                    paragraph.style.paragraph_format.space_before = Pt(rule['space_before'])
-                    paragraph.style.paragraph_format.space_after = Pt(rule['space_after'])
-                    paragraph.style.paragraph_format.line_spacing = rule['line_spacing']
-                    paragraph.style.paragraph_format.first_line_indent = Cm(rule['first_line_indent'])
-                    # 修改字体字号和粗体
-                    for run in paragraph.runs:
-                        set_font(run, rule['cz_font_name'], rule['font_name'])
-                        run.font.size = Pt(rule['font_size'])
-                        run.font.bold = rule['bold']
-        else:            
-            # 修改段前段后行距和首行缩进
-            paragraph.paragraph_format.space_before = bdy_space_before
-            paragraph.paragraph_format.space_after = bdy_space_after
-            paragraph.paragraph_format.line_spacing = bdy_line_spacing
-            paragraph.paragraph_format.first_line_indent = bdy_first_line_indent
-            # 修改字体字号
-            for run in paragraph.runs:
+    """
+    skipped = set()  # 收集被跳过的样式
+    for p in doc.paragraphs:
+        style_name = p.style.name
+
+        # 跳过不认识的样式
+        if style_name not in KNOWN_STYLES:
+            skipped.add(style_name)
+            continue
+            
+        # 遍历文档中的每个段落
+        if style_name.startswith("Heading"):
+            ...  # 原 Heading 处理不动
+        else:
+            # 这里就是 Normal / List Paragraph
+            p.paragraph_format.space_before = bdy_space_before
+            p.paragraph_format.space_after  = bdy_space_after
+            p.paragraph_format.line_spacing = bdy_line_spacing
+            p.paragraph_format.first_line_indent = bdy_first_line_indent
+            for run in p.runs:
                 set_font(run, bdy_cz_font_name, bdy_font_name)
                 run.font.size = bdy_font_size
 
-                
-    # 遍历文档中的每个表格
-    for table in doc.tables:
-        table.width = tbl_width 
-        # 遍历表格中的每个单元格
-        for row in table.rows:
+    # ----------- 修改表格 ----------
+    for tbl in doc.tables:
+        tbl.width = tbl_width
+        for row in tbl.rows:
             for cell in row.cells:
-                for paragraph in cell.paragraphs:
-                    # 修改字体和字号
-                    for run in paragraph.runs:
-                        # 设置中文字体和英文字体
+                for p in cell.paragraphs:
+                    # 表格里只动 Normal
+                    if p.style.name != "Normal":
+                        skipped.add(f"表格内：{p.style.name}")
+                        continue
+                    for run in p.runs:
                         set_font(run, tbl_cz_font_name, tbl_font_name)
-                        # 设置字号
                         run.font.size = tbl_font_size
+                    p.paragraph_format.space_before = tbl_space_before
+                    p.paragraph_format.space_after  = tbl_space_after
+                    p.paragraph_format.line_spacing = tbl_line_spacing
 
-                    # 修改段前段后行距
-                    paragraph.paragraph_format.space_before = tbl_space_before
-                    paragraph.paragraph_format.space_after = tbl_space_after
-                    paragraph.paragraph_format.line_spacing = tbl_line_spacing
+    # ---------------- 给用户反馈 ----------------
+    if skipped:
+        st.warning("以下样式未被处理（已跳过）：")
+        st.text("\n".join(sorted(skipped)))
+    else:
+        st.success("所有段落/表格样式均已成功处理！")
 
 def process_doc(uploaded_bytes):
     doc = Document(BytesIO(uploaded_bytes))
-    # 下面就是你原来的 main 逻辑里“处理”部分
     restructure_outline(doc)
     kill_all_numbering(doc)
     add_heading_numbers(doc)
@@ -341,6 +342,7 @@ if files and st.button("开始批量排版"):
                 file_name=f"{f.name.replace('.docx', '')}_已排版.docx",
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             )
+
 
 
 
