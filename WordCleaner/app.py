@@ -112,7 +112,7 @@ st.markdown("""
     }
     .setting-item {
         display: grid;
-        grid-template-columns: 120px 1fr;
+        grid-template-columns: 100px 1fr;
         align-items: center;
         gap: 0.8rem;
         padding: 0.4rem 0;
@@ -166,10 +166,23 @@ st.markdown("""
     .stTabs [aria-selected="true"]:hover {
         background: linear-gradient(135deg, #5a6fd8 0%, #6a4090 100%) !important;
     }
-    .compact-container {
-        max-width: 900px;
-        margin: 0 auto;
-        padding: 0 0.5rem;
+    .help-section {
+        background: #F9FAFB;
+        padding: 0.8rem;
+        border-radius: 6px;
+        margin: 0.5rem 0;
+        border-left: 3px solid #4F46E5;
+    }
+    .help-title {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.3rem;
+        font-size: 0.9rem;
+    }
+    .help-content {
+        font-size: 0.8rem;
+        color: #6B7280;
+        line-height: 1.4;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -365,7 +378,7 @@ def config_main():
             # 显示1-9级标题设置
             for level in range(1, 10):
                 st.markdown(f'<div class="level-item">', unsafe_allow_html=True)
-                st.markdown(f'<div style="font-weight: 500; margin-bottom: 0.2rem;">{level}级标题</div>', unsafe_allow_html=True)
+                st.markdown(f'<div style="font-weight: 500; margin-bottom: 0.2rem; font-size: 0.9rem;">{level}级标题</div>', unsafe_allow_html=True)
                 
                 # 是否应用序号
                 apply = st.checkbox(
@@ -589,75 +602,128 @@ def config_main():
         
         st.markdown('</div>', unsafe_allow_html=True)
 
+def help_sidebar():
+    """侧边栏帮助信息"""
+    with st.sidebar:
+        st.markdown("### 📖 使用说明")
+        
+        st.markdown('<div class="help-section">', unsafe_allow_html=True)
+        st.markdown('<div class="help-title">📤 上传文档</div>', unsafe_allow_html=True)
+        st.markdown('<div class="help-content">选择需要格式化的.docx文件，文件大小建议不超过50MB</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        st.markdown('<div class="help-section">', unsafe_allow_html=True)
+        st.markdown('<div class="help-title">⚙️ 参数设置</div>', unsafe_allow_html=True)
+        st.markdown('<div class="help-content">')
+        st.markdown("""
+        - **标题设置**：控制各级标题的自动编号
+        - **正文设置**：调整文档正文的格式样式
+        - **表格设置**：设置表格的字体和间距
+        """, unsafe_allow_html=True)
+        st.markdown('</div></div>', unsafe_allow_html=True)
+        
+        st.markdown('<div class="help-section">', unsafe_allow_html=True)
+        st.markdown('<div class="help-title">🚀 处理流程</div>', unsafe_allow_html=True)
+        st.markdown('<div class="help-content">')
+        st.markdown("""
+        1. 上传文档
+        2. 设置参数
+        3. 点击"开始处理"
+        4. 下载处理后的文件
+        """, unsafe_allow_html=True)
+        st.markdown('</div></div>', unsafe_allow_html=True)
+        
+        st.markdown('<div class="help-section">', unsafe_allow_html=True)
+        st.markdown('<div class="help-title">✨ 功能特点</div>', unsafe_allow_html=True)
+        st.markdown('<div class="help-content">')
+        st.markdown("""
+        • 自动转换大纲级别为标题
+        • 支持9级标题自动编号
+        • 多种序号格式可选
+        • 统一正文和表格格式
+        """, unsafe_allow_html=True)
+        st.markdown('</div></div>', unsafe_allow_html=True)
+        
+        st.markdown("---")
+        
+        # 重置按钮
+        if st.button("🔄 重置所有设置", use_container_width=True):
+            st.session_state.config = DEFAULT_CONFIG.copy()
+            st.success("设置已重置！")
+            st.rerun()
+
 def main():
-    # 主容器
-    st.markdown('<div class="compact-container">', unsafe_allow_html=True)
-    
     # 主标题
     st.markdown('<h1 class="main-header">📝 Word文档格式化工具</h1>', unsafe_allow_html=True)
     
-    # 上传区域
-    uploaded_file = st.file_uploader(
-        "上传Word文档 (.docx)",
-        type=['docx'],
-        help="选择需要格式化的.docx文件"
-    )
+    # 创建两列布局
+    col1, col2 = st.columns([3, 1])
     
-    if uploaded_file:
-        st.markdown(f'''
-        <div class="file-info">
-            <div style="font-size: 1rem; font-weight: 600; margin-bottom: 0.2rem;">
-                📄 {uploaded_file.name}
-            </div>
-            <div style="font-size: 0.8rem; opacity: 0.9;">
-                大小: {len(uploaded_file.getvalue()) / 1024:.1f} KB
-            </div>
-        </div>
-        ''', unsafe_allow_html=True)
-    
-    # 参数设置区域
-    config_main()
-    
-    # 处理按钮区域
-    st.markdown("---")
-    if uploaded_file:
-        col1, col2 = st.columns([1, 1])
-        with col1:
-            if st.button("🚀 开始处理文档", type="primary", use_container_width=True, key="process_button"):
-                with st.spinner("正在处理文档..."):
-                    processed_doc = process_document(uploaded_file, st.session_state.config)
-                    
-                    if processed_doc:
-                        st.session_state.processed = True
-                        st.session_state.processed_data = processed_doc
-                        st.session_state.output_filename = f"已处理_{uploaded_file.name}"
-                        st.rerun()
+    with col1:
+        # 上传区域
+        uploaded_file = st.file_uploader(
+            "上传Word文档 (.docx)",
+            type=['docx'],
+            help="选择需要格式化的.docx文件"
+        )
         
-        with col2:
-            if st.button("🔄 重置设置", use_container_width=True):
-                st.session_state.config = DEFAULT_CONFIG.copy()
-                st.success("设置已重置！")
-                st.rerun()
-    
-    # 结果展示区域
-    if st.session_state.processed:
-        st.markdown('<div class="success-box">✅ 文档处理完成！</div>', unsafe_allow_html=True)
+        if uploaded_file:
+            st.markdown(f'''
+            <div class="file-info">
+                <div style="font-size: 1rem; font-weight: 600; margin-bottom: 0.2rem;">
+                    📄 {uploaded_file.name}
+                </div>
+                <div style="font-size: 0.8rem; opacity: 0.9;">
+                    大小: {len(uploaded_file.getvalue()) / 1024:.1f} KB
+                </div>
+            </div>
+            ''', unsafe_allow_html=True)
         
-        col_a, col_b = st.columns([1, 1])
-        with col_a:
-            st.download_button(
-                label=f"📥 下载 {st.session_state.output_filename}",
-                data=st.session_state.processed_data.getvalue(),
-                file_name=st.session_state.output_filename,
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                use_container_width=True
-            )
-        with col_b:
-            if st.button("🔄 重新处理", use_container_width=True):
-                st.session_state.processed = False
-                st.rerun()
+        # 参数设置区域
+        config_main()
+        
+        # 处理按钮区域
+        st.markdown("---")
+        if uploaded_file:
+            col1, col2 = st.columns([1, 1])
+            with col1:
+                if st.button("🚀 开始处理文档", type="primary", use_container_width=True, key="process_button"):
+                    with st.spinner("正在处理文档..."):
+                        processed_doc = process_document(uploaded_file, st.session_state.config)
+                        
+                        if processed_doc:
+                            st.session_state.processed = True
+                            st.session_state.processed_data = processed_doc
+                            st.session_state.output_filename = f"已处理_{uploaded_file.name}"
+                            st.rerun()
+            
+            with col2:
+                if st.button("🔄 重置设置", use_container_width=True):
+                    st.session_state.config = DEFAULT_CONFIG.copy()
+                    st.success("设置已重置！")
+                    st.rerun()
+        
+        # 结果展示区域
+        if st.session_state.processed:
+            st.markdown('<div class="success-box">✅ 文档处理完成！</div>', unsafe_allow_html=True)
+            
+            col_a, col_b = st.columns([1, 1])
+            with col_a:
+                st.download_button(
+                    label=f"📥 下载 {st.session_state.output_filename}",
+                    data=st.session_state.processed_data.getvalue(),
+                    file_name=st.session_state.output_filename,
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    use_container_width=True
+                )
+            with col_b:
+                if st.button("🔄 重新处理", use_container_width=True):
+                    st.session_state.processed = False
+                    st.rerun()
     
-    st.markdown('</div>', unsafe_allow_html=True)
+    with col2:
+        # 侧边栏帮助信息
+        help_sidebar()
 
 if __name__ == "__main__":
     main()
