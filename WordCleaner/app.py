@@ -121,28 +121,6 @@ if 'params_initialized' not in st.session_state:
         
         # 编号方案选择
         "numbering_scheme": "方案一：中文数字",
-        
-        # 方案一：中文数字方案的具体样式
-        "scheme1_h1": "一、",
-        "scheme1_h2": "（一）",
-        "scheme1_h3": "1.",
-        "scheme1_h4": "（1）",
-        "scheme1_h5": "（i）",
-        "scheme1_h6": "（a）",
-        "scheme1_h7": "（一）",
-        "scheme1_h8": "（1）",
-        "scheme1_h9": "（i）",
-        
-        # 方案二：数字点号方案的具体样式
-        "scheme2_h1": "1.",
-        "scheme2_h2": "1.1",
-        "scheme2_h3": "1.1.1",
-        "scheme2_h4": "1.1.1.1",
-        "scheme2_h5": "1.1.1.1.1",
-        "scheme2_h6": "1.1.1.1.1.1",
-        "scheme2_h7": "1.1.1.1.1.1.1",
-        "scheme2_h8": "1.1.1.1.1.1.1.1",
-        "scheme2_h9": "1.1.1.1.1.1.1.1.1",
     }
     
     st.session_state.update(defaults)
@@ -167,26 +145,41 @@ with st.sidebar:
         level_num = int(heading_level[0])
         prefix = f"h{level_num}_"
         
-        # 编号方案选择
-        st.selectbox(
-            "选择编号方案",
-            options=["方案一：中文数字", "方案二：数字点号"],
-            key="numbering_scheme_select",
-            index=0 if st.session_state["numbering_scheme"] == "方案一：中文数字" else 1,
-            on_change=lambda: st.session_state.update({"numbering_scheme": st.session_state["numbering_scheme_select"]})
-        )
+        # 编号方案和样式显示 - 放到一行
+        col_scheme, col_style = st.columns([2, 3])
+        with col_scheme:
+            st.session_state["numbering_scheme"] = st.selectbox(
+                "编号方案",
+                options=["方案一：中文数字", "方案二：数字点号"],
+                index=0 if st.session_state["numbering_scheme"] == "方案一：中文数字" else 1,
+                key="numbering_scheme_select",
+                label_visibility="collapsed"
+            )
         
-        # 根据选择的方案显示对应级别的编号样式
-        scheme_num = 1 if st.session_state["numbering_scheme"] == "方案一：中文数字" else 2
-        scheme_prefix = f"scheme{scheme_num}_h{level_num}"
-        
-        # 显示当前级别的编号样式（只读）
-        st.text_input(
-            "当前编号样式",
-            value=st.session_state[scheme_prefix],
-            disabled=True,
-            key=f"number_style_display_{level_num}"
-        )
+        with col_style:
+            # 根据选择的方案显示对应级别的编号样式
+            if st.session_state["numbering_scheme"] == "方案一：中文数字":
+                scheme_styles = {
+                    1: "一、", 2: "（一）", 3: "1.", 4: "（1）", 
+                    5: "（i）", 6: "（a）", 7: "（一）", 8: "（1）", 9: "（i）"
+                }
+            else:
+                # 方案二：数字点号方案
+                scheme_styles = {
+                    1: "1.", 2: "1.1", 3: "1.1.1", 4: "1.1.1.1", 
+                    5: "1.1.1.1.1", 6: "1.1.1.1.1.1", 
+                    7: "1.1.1.1.1.1.1", 8: "1.1.1.1.1.1.1.1", 
+                    9: "1.1.1.1.1.1.1.1.1"
+                }
+            
+            current_style = scheme_styles[level_num]
+            st.text_input(
+                "编号样式",
+                value=current_style,
+                disabled=True,
+                key=f"number_style_display_{level_num}",
+                label_visibility="collapsed"
+            )
         
         st.markdown("---")
         
@@ -845,3 +838,12 @@ def process_single_document(file_bytes, style_rules, numbering_scheme, params, a
     if skipped:
         st.warning(f"跳过样式: {', '.join(sorted(skipped))}")
     
+    # 保存到buffer
+    buffer = BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+    return buffer
+
+# 页脚
+st.markdown("---")
+st.caption("© 2024 Word自动排版工具 | 专业排版 • 高效便捷")
