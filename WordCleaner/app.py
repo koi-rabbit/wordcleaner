@@ -133,7 +133,6 @@ with st.sidebar:
     
     with tab1:
         # 标题级别选择器
-        st.markdown("**选择标题级别**")
         heading_options = ["1级", "2级", "3级", "4级", "5级", "6级", "7级", "8级", "9级"]
         selected_heading = st.radio(
             "",
@@ -151,7 +150,6 @@ with st.sidebar:
         st.markdown("---")
         
         # 字体设置 - 使用两行显示，避免拥挤
-        st.markdown("**字体设置**")
         col1, col2 = st.columns(2)
         with col1:
             st.markdown("中文字体")
@@ -173,7 +171,6 @@ with st.sidebar:
             )
         
         # 字体大小和粗体
-        st.markdown("**字体属性**")
         col_size, col_bold = st.columns([3, 1])
         with col_size:
             st.markdown("字体大小")
@@ -195,7 +192,6 @@ with st.sidebar:
             )
         
         # 间距设置
-        st.markdown("**段落间距**")
         col_before, col_after = st.columns(2)
         with col_before:
             st.markdown("段前间距(pt)")
@@ -221,7 +217,6 @@ with st.sidebar:
             )
         
         # 行距和缩进
-        st.markdown("**段落格式**")
         col_line, col_indent = st.columns(2)
         with col_line:
             st.markdown("行间距")
@@ -865,3 +860,4 @@ def process_single_document(file_bytes, style_rules, params):
 # 页脚
 st.markdown("---")
 st.caption("© 2024 Word自动排版工具 | 专业排版 • 高效便捷")
+
