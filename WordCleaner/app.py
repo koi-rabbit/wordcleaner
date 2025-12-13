@@ -41,7 +41,7 @@ if 'params_initialized' not in st.session_state:
         "h1_cz_font": "黑体",
         "h1_font": "Arial",
         "h1_size": 14,
-        "h1_bold": True,
+        "h1_bold": False,
         "h1_before": 12,
         "h1_after": 12,
         "h1_line": 1.5,
@@ -50,7 +50,7 @@ if 'params_initialized' not in st.session_state:
         "h2_cz_font": "黑体",
         "h2_font": "Arial",
         "h2_size": 12,
-        "h2_bold": True,
+        "h2_bold": False,
         "h2_before": 12,
         "h2_after": 12,
         "h2_line": 1.5,
@@ -118,6 +118,17 @@ if 'params_initialized' not in st.session_state:
         "h9_after": 0,
         "h9_line": 1.0,
         "h9_indent": 0,
+        
+        # 编号样式
+        "h1_number_style": "一、",
+        "h2_number_style": "（一）",
+        "h3_number_style": "1.",
+        "h4_number_style": "（1）",
+        "h5_number_style": "①",
+        "h6_number_style": "（①）",
+        "h7_number_style": "a.",
+        "h8_number_style": "（a）",
+        "h9_number_style": "i.",
     }
     
     st.session_state.update(defaults)
@@ -142,8 +153,18 @@ with st.sidebar:
         level_num = int(heading_level[0])
         prefix = f"h{level_num}_"
         
+        # 编号样式设置
+        st.selectbox(
+            "选择编号样式",
+            options=["一、", "1.", "（一）", "（1）", "①", "（①）", "a.", "（a）", "i."],
+            key=f"{prefix}number_style_select",
+            index=["一、", "1.", "（一）", "（1）", "①", "（①）", "a.", "（a）", "i."].index(st.session_state[f"{prefix}number_style"]),
+            on_change=lambda: st.session_state.update({f"{prefix}number_style": st.session_state[f"{prefix}number_style_select"]})
+        )
+        
         st.markdown("---")
-        # 字体设置 - 使用两行显示，避免拥挤
+        
+        # 字体设置
         col1, col2 = st.columns(2)
         with col1:
             st.session_state[f"{prefix}cz_font"] = st.selectbox(
@@ -160,8 +181,8 @@ with st.sidebar:
                 key=f"{prefix}font_select"
             )
         
-        # 字体大小和粗体
-        col_size, col_bold = st.columns([3, 1])
+        # 字体大小和粗体设置（粗体改为下拉选择）
+        col_size, col_bold = st.columns(2)
         with col_size:
             st.session_state[f"{prefix}size"] = st.number_input(
                 "字体大小(pt)",
@@ -172,11 +193,16 @@ with st.sidebar:
                 key=f"{prefix}size_input"
             )
         with col_bold:
-            st.session_state[f"{prefix}bold"] = st.checkbox(
+            # 粗体改为下拉选择
+            bold_options = ["否", "是"]
+            current_bold = "是" if st.session_state[f"{prefix}bold"] else "否"
+            selected_bold = st.selectbox(
                 "粗体",
-                value=st.session_state[f"{prefix}bold"],
-                key=f"{prefix}bold_check"
+                options=bold_options,
+                index=bold_options.index(current_bold),
+                key=f"{prefix}bold_select"
             )
+            st.session_state[f"{prefix}bold"] = (selected_bold == "是")
         
         # 间距设置
         col_before, col_after = st.columns(2)
@@ -220,27 +246,28 @@ with st.sidebar:
                 key=f"{prefix}indent_input"
             )
         
-        # 样式预览
+        # 重置当前标题级别的按钮
         st.markdown("---")
-        st.markdown("**样式预览**")
-        st.markdown(f"""
-        <div style="
-            font-family: '{st.session_state[f"{prefix}font"]}', '{st.session_state[f"{prefix}cz_font"]}';
-            font-size: {st.session_state[f"{prefix}size"]}pt;
-            font-weight: {'bold' if st.session_state[f"{prefix}bold"] else 'normal'};
-            margin: {st.session_state[f"{prefix}before"]}pt 0 {st.session_state[f"{prefix}after"]}pt 0;
-            line-height: {st.session_state[f"{prefix}line"]};
-            text-indent: {st.session_state[f"{prefix}indent"]}cm;
-            background-color: #f8f9fa;
-            padding: 12px;
-            border-radius: 8px;
-            border-left: 4px solid #4CAF50;
-        ">
-            标题 {heading_level} 样式预览
-        </div>
-        """, unsafe_allow_html=True)
+        if st.button(f"🔄 重置{heading_level}设置", use_container_width=True):
+            # 重置当前级别的设置
+            reset_keys = {
+                f"{prefix}cz_font": defaults[f"{prefix}cz_font"],
+                f"{prefix}font": defaults[f"{prefix}font"],
+                f"{prefix}size": defaults[f"{prefix}size"],
+                f"{prefix}bold": defaults[f"{prefix}bold"],
+                f"{prefix}before": defaults[f"{prefix}before"],
+                f"{prefix}after": defaults[f"{prefix}after"],
+                f"{prefix}line": defaults[f"{prefix}line"],
+                f"{prefix}indent": defaults[f"{prefix}indent"],
+                f"{prefix}number_style": defaults[f"{prefix}number_style"],
+            }
+            for key, value in reset_keys.items():
+                st.session_state[key] = value
+            st.success(f"{heading_level}设置已重置！")
+            st.rerun()
     
     with tab2:
+        # 正文格式设置
         st.markdown("### 正文格式")
         
         # 字体设置
@@ -312,26 +339,25 @@ with st.sidebar:
                 key="bdy_indent_input"
             )
         
-        # 正文预览
+        # 重置正文设置按钮
         st.markdown("---")
-        st.markdown("**正文预览**")
-        st.markdown(f"""
-        <div style="
-            font-family: '{st.session_state['bdy_font_name']}', '{st.session_state['bdy_cz_font_name']}';
-            font-size: {st.session_state['bdy_font_size']}pt;
-            margin: {st.session_state['bdy_space_before']}pt 0 {st.session_state['bdy_space_after']}pt 0;
-            line-height: {st.session_state['bdy_line_spacing']};
-            text-indent: {st.session_state['bdy_first_line_indent']}cm;
-            background-color: #f8f9fa;
-            padding: 12px;
-            border-radius: 8px;
-            border-left: 4px solid #2196F3;
-        ">
-            这是正文样式预览。文档的正文内容将使用此格式进行设置，包括字体、字号、行距和首行缩进等。
-        </div>
-        """, unsafe_allow_html=True)
+        if st.button("🔄 重置正文设置", use_container_width=True):
+            reset_keys = {
+                "bdy_cz_font_name": defaults["bdy_cz_font_name"],
+                "bdy_font_name": defaults["bdy_font_name"],
+                "bdy_font_size": defaults["bdy_font_size"],
+                "bdy_space_before": defaults["bdy_space_before"],
+                "bdy_space_after": defaults["bdy_space_after"],
+                "bdy_line_spacing": defaults["bdy_line_spacing"],
+                "bdy_first_line_indent": defaults["bdy_first_line_indent"],
+            }
+            for key, value in reset_keys.items():
+                st.session_state[key] = value
+            st.success("正文设置已重置！")
+            st.rerun()
     
     with tab3:
+        # 表格格式设置
         st.markdown("### 表格格式")
         
         # 字体设置
@@ -402,16 +428,23 @@ with st.sidebar:
                 step=0.1,
                 key="tbl_width_input"
             )
-    
-    # 重置按钮和操作说明
-    st.markdown("---")
-    
-    if st.button("🔄 重置所有设置", use_container_width=True, help="重置所有设置为默认值"):
-        # 重置为默认值
-        for key, value in defaults.items():
-            st.session_state[key] = value
-        st.success("已重置为默认设置！")
-        st.rerun()
+        
+        # 重置表格设置按钮
+        st.markdown("---")
+        if st.button("🔄 重置表格设置", use_container_width=True):
+            reset_keys = {
+                "tbl_cz_font_name": defaults["tbl_cz_font_name"],
+                "tbl_font_name": defaults["tbl_font_name"],
+                "tbl_font_size": defaults["tbl_font_size"],
+                "tbl_space_before": defaults["tbl_space_before"],
+                "tbl_space_after": defaults["tbl_space_after"],
+                "tbl_line_spacing": defaults["tbl_line_spacing"],
+                "tbl_width": defaults["tbl_width"],
+            }
+            for key, value in reset_keys.items():
+                st.session_state[key] = value
+            st.success("表格设置已重置！")
+            st.rerun()
 
 # ========== 主页面：简洁的文件处理界面 ==========
 st.title("📝 Word自动排版工具")
@@ -478,6 +511,7 @@ if uploaded_files:
         
         # 从session_state获取当前样式配置
         style_rules = {}
+        number_styles = {}
         for level in range(1, 10):
             prefix = f"h{level}_"
             style_rules[level] = {
@@ -491,6 +525,7 @@ if uploaded_files:
                 'line_spacing': st.session_state[f"{prefix}line"],
                 'first_line_indent': st.session_state[f"{prefix}indent"],
             }
+            number_styles[level] = st.session_state[f"{prefix}number_style"]
         
         # 处理每个文件
         with results_container:
@@ -505,7 +540,9 @@ if uploaded_files:
                     processed_buffer = process_single_document(
                         uploaded_file.read(),
                         style_rules,
-                        st.session_state
+                        number_styles,
+                        st.session_state,
+                        add_numbers
                     )
                     
                     # 显示处理结果
@@ -595,57 +632,23 @@ def set_font(run, cz_font_name, font_name):
     rFonts.set(qn('w:eastAsia'), cz_font_name)
     rFonts.set(qn('w:ascii'), font_name)
 
-def number_to_chinese(number):
-    """数字转中文大写数字"""
-    if number < 0 or number > 100:
-        raise ValueError("数字必须在0到100之间")
+def add_heading_numbers_custom(doc, number_styles, add_numbers=True):
+    """添加自定义标题序号"""
+    if not add_numbers:
+        return
     
-    chinese_numbers = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"]
-    
-    if number < 10:
-        return chinese_numbers[number]
-    elif number < 20:
-        return "十" + (chinese_numbers[number - 10] if number != 10 else "")
-    elif number < 100:
-        tens = number // 10
-        ones = number % 10
-        return chinese_numbers[tens] + "十" + (chinese_numbers[ones] if ones != 0 else "")
-    else:
-        return "一百"
-
-def add_heading_numbers(doc):
-    """添加标题序号"""
     number_pattern = re.compile(
         r'^\s*'
         r'[（(]?'
-        r'[\d一二三四五六七八九十零]{1,3}'
+        r'[\d一二三四五六七八九十零①②③④⑤⑥⑦⑧⑨⑩]{1,3}'
         r'[\.、）)\s]'
-        r'(?:[\d一二三四五六七八九十零]{1,3}'
+        r'(?:[\d一二三四五六七八九十零①②③④⑤⑥⑦⑧⑨⑩]{1,3}'
         r'[\.、）)\s]'
         r')*',
         re.UNICODE
     )
     
     heading_numbers = [0] * 9
-    
-    def circled_num(n: int) -> str:
-        if 1 <= n <= 20:
-            return chr(0x245F + n)
-        return str(n)
-    
-    def format_number(level, number):
-        formats = [
-            lambda n: f"{number_to_chinese(n)}、",
-            lambda n: f"（{number_to_chinese(n)}）",
-            lambda n: f"{n}.",
-            lambda n: f"（{n}）",
-            lambda n: f"{circled_num(n)} ",
-            lambda n: f"{circled_num(n)} ",
-            lambda n: f"{circled_num(n)} ",
-            lambda n: f"{circled_num(n)} ",
-            lambda n: f"{circled_num(n)} ",
-        ]
-        return formats[level](number) if level < len(formats) else f"{number}."
     
     for paragraph in doc.paragraphs:
         if paragraph.style.name.startswith('Heading'):
@@ -669,10 +672,45 @@ def add_heading_numbers(doc):
             
             # 添加序号
             if heading_numbers[level] > 0:
-                number_str = format_number(level, heading_numbers[level])
-                paragraph.text = number_str + paragraph.text
+                number_style = number_styles.get(level + 1, "")
+                if number_style:
+                    # 根据样式类型格式化序号
+                    if "一" in number_style:
+                        # 中文数字序号
+                        chinese_numbers = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十"]
+                        if heading_numbers[level] <= 10:
+                            number = chinese_numbers[heading_numbers[level] - 1]
+                        else:
+                            number = str(heading_numbers[level])
+                    elif "①" in number_style:
+                        # 圆圈数字序号
+                        circled_nums = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩"]
+                        if heading_numbers[level] <= 10:
+                            number = circled_nums[heading_numbers[level] - 1]
+                        else:
+                            number = str(heading_numbers[level])
+                    elif "a" in number_style.lower():
+                        # 字母序号
+                        if heading_numbers[level] <= 26:
+                            number = chr(96 + heading_numbers[level])  # a-z
+                        else:
+                            number = str(heading_numbers[level])
+                    elif "i" in number_style.lower():
+                        # 罗马数字序号（简单实现）
+                        roman_nums = ["i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix", "x"]
+                        if heading_numbers[level] <= 10:
+                            number = roman_nums[heading_numbers[level] - 1]
+                        else:
+                            number = str(heading_numbers[level])
+                    else:
+                        # 阿拉伯数字序号
+                        number = str(heading_numbers[level])
+                    
+                    # 构建序号字符串
+                    number_str = number_style.replace("一", number).replace("1", number).replace("①", number).replace("a", number).replace("i", number)
+                    paragraph.text = number_str + paragraph.text
 
-def process_single_document(file_bytes, style_rules, params):
+def process_single_document(file_bytes, style_rules, number_styles, params, add_numbers=True):
     """处理单个文档"""
     doc = Document(BytesIO(file_bytes))
     
@@ -683,7 +721,7 @@ def process_single_document(file_bytes, style_rules, params):
     kill_all_numbering(doc)
     
     # 添加标题序号
-    add_heading_numbers(doc)
+    add_heading_numbers_custom(doc, number_styles, add_numbers)
     
     # 应用格式
     skipped = set()
