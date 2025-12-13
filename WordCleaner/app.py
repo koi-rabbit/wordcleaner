@@ -161,9 +161,7 @@ with st.sidebar:
             index=["一、", "1.", "（一）", "（1）", "①", "（①）", "a.", "（a）", "i."].index(st.session_state[f"{prefix}number_style"]),
             on_change=lambda: st.session_state.update({f"{prefix}number_style": st.session_state[f"{prefix}number_style_select"]})
         )
-        
-        st.markdown("---")
-        
+       
         # 字体设置
         col1, col2 = st.columns(2)
         with col1:
@@ -785,3 +783,4 @@ def process_single_document(file_bytes, style_rules, number_styles, params, add_
 # 页脚
 st.markdown("---")
 st.caption("© 2024 Word自动排版工具 | 专业排版 • 高效便捷")
+
